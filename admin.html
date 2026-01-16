@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Admin - Brenno Cell</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <h1>Painel de Controle 🔒</h1>
+    </header>
+
+    <main class="admin-container">
+        <section class="card">
+            <h2>Cadastrar Novo Produto</h2>
+            <form id="formProduto">
+                <input type="text" id="modelo" placeholder="Modelo (ex: iPhone 13 Pro)" required>
+                <input type="text" id="detalhes" placeholder="Detalhes (ex: 128GB - Grafite)" required>
+                <input type="number" id="preco" placeholder="Preço (R$)" required>
+                <input type="url" id="imagem" placeholder="Link da Imagem (URL)">
+                <button type="submit" class="btn-green">Adicionar ao Estoque</button>
+            </form>
+        </section>
+
+        <section class="card">
+            <h2>Estoque Atual</h2>
+            <div id="listaProdutos" class="product-list">
+                <p>Carregando estoque...</p>
+            </div>
+        </section>
+    </main>
+
+    <script type="module" src="js/admin.js"></script>
+</body>
+</html>
