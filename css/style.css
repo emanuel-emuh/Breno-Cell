@@ -1,0 +1,120 @@
+/* css/style.css */
+:root {
+    --bg-color: #121212;
+    --card-bg: #1e1e1e;
+    --text-color: #ffffff;
+    --primary-green: #00e676; /* Verde Neon */
+    --dark-green: #00a854;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+/* Header */
+header {
+    text-align: center;
+    padding: 20px;
+    border-bottom: 2px solid var(--primary-green);
+}
+
+/* Grid da Vitrine */
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* Responsivo */
+    gap: 15px;
+    padding: 20px;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+/* Card do Produto */
+.card-produto {
+    background-color: var(--card-bg);
+    border-radius: 10px;
+    overflow: hidden;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    transition: transform 0.2s;
+}
+
+.card-produto:hover {
+    transform: translateY(-5px);
+    border: 1px solid var(--primary-green);
+}
+
+.card-produto img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+}
+
+.info {
+    padding: 15px;
+}
+
+.preco {
+    color: var(--primary-green);
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+/* Botões */
+.btn-zap, .btn-green {
+    display: block;
+    background-color: var(--primary-green);
+    color: #000;
+    text-decoration: none;
+    padding: 10px;
+    border-radius: 5px;
+    font-weight: bold;
+    margin-top: 10px;
+    border: none;
+    width: 100%;
+    cursor: pointer;
+}
+
+.btn-zap:hover {
+    background-color: var(--dark-green);
+    color: white;
+}
+
+/* Admin e Formulários */
+.admin-container {
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 20px;
+}
+
+input {
+    width: 95%;
+    padding: 10px;
+    margin-bottom: 10px;
+    background: #333;
+    border: 1px solid #555;
+    color: white;
+    border-radius: 5px;
+}
+
+.product-item {
+    background: #333;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.btn-delete {
+    background: #ff4444;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+}

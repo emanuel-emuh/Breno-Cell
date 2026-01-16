@@ -1,15 +1,3 @@
-# Ignorar ambiente virtual do Python (que aparece no seu print)
-.venv/
-venv/
-
-# Ignorar arquivos temporários e caches
-__pycache__/
-*.pyc
-
-# Ignorar arquivos de sistema
 .DS_Store
-Thumbs.db
-
-# Ignorar chaves de segurança antigas (se tiver sobrado o arquivo)
-firebase_key.json
+node_modules/
 .env
