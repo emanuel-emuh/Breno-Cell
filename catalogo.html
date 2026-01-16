@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo Completo | Brenno Cell</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="theme-brenno">
+
+    <nav class="navbar">
+        <a href="index.html" class="logo"><span style="color:var(--accent)">BRENNO </span>CELL</a>
+        <ul class="nav-menu">
+            <li class="nav-item"><a href="index.html" class="nav-link">Início</a></li>
+            <li class="nav-item"><a href="#" class="nav-link" style="color:var(--accent)">Catálogo</a></li>
+            <li class="nav-item"><a href="index.html#contatos" class="nav-link">Contatos</a></li>
+        </ul>
+        <a href="index.html" class="switch-btn">
+            <i class="fas fa-arrow-left"></i> VOLTAR
+        </a>
+        <div class="hamburger">
+            <span class="bar"></span>
+            <span class="bar"></span>
+            <span class="bar"></span>
+        </div>
+    </nav>
+
+    <header class="hero" style="min-height: 35vh; background-image: url('https://images.unsplash.com/photo-1556656793-02715d8dd6f8?q=80&w=2070&auto=format&fit=crop');">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <h1 class="title-masculine" style="font-size: 2.5rem;">LOJA <span style="color:var(--accent)">ONLINE</span></h1>
+            <p class="subtitle">Escolha o seu novo smartphone.</p>
+        </div>
+    </header>
+
+    <section class="controls-section">
+        <div class="controls-container">
+            
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchClient" placeholder="Buscar modelo (Ex: iPhone 13)...">
+            </div>
+
+            <div class="filter-pills" id="categoryFilters">
+                <button class="pill active" data-cat="todos">Todos</button>
+                <button class="pill" data-cat="iPhone">iPhones</button>
+                <button class="pill" data-cat="Android">Androids</button>
+                <button class="pill" data-cat="Acessório">Acessórios</button>
+            </div>
+
+            <div class="sort-box">
+                <select id="sortPrice">
+                    <option value="relevancia">Relevância</option>
+                    <option value="menor">Menor Preço</option>
+                    <option value="maior">Maior Preço</option>
+                </select>
+            </div>
+        </div>
+
+        <p id="resultCount" style="text-align: center; color: #666; margin-top: 15px; font-size: 0.9rem;">
+            Mostrando todos os produtos
+        </p>
+    </section>
+
+    <section class="catalog-section" style="padding-top: 20px;">
+        <div id="vitrine-completa" class="catalog-grid">
+            <p style="text-align: center; grid-column: 1/-1; color: #666;">
+                <i class="fas fa-spinner fa-spin"></i> Carregando estoque...
+            </p>
+        </div>
+    </section>
+
+    <footer>
+        <p>© 2026 Brenno Cell. Todos os direitos reservados.</p>
+    </footer>
+
+    <a href="https://wa.me/5584999999999" class="float-wa" target="_blank">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>

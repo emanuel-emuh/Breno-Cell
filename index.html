@@ -3,24 +3,164 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Catálogo Brenno Cell</title>
+    <title>Brenno Cell | O Rei dos iPhones</title>
+    
     <link rel="stylesheet" href="css/style.css">
+    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
-<body>
-    <header class="store-header">
-        <img src="https://via.placeholder.com/100x50?text=LOGO" alt="Brenno Cell" class="logo">
-        <p>O Rei dos iPhones </p>
+<body class="theme-brenno">
+
+    <nav class="navbar">
+        <ul class="nav-menu">
+            <li class="nav-item"><a href="#" class="nav-link">Início</a></li>
+            <li class="nav-item"><a href="catalogo.html" class="nav-link">Catálogo</a></li>
+            <li class="nav-item"><a href="#contatos" class="nav-link">Contatos</a></li>
+        </ul>
+        <a href="#contatos" class="switch-btn">
+            <i class="fab fa-whatsapp"></i> FALE CONOSCO
+        </a>
+        <div class="hamburger">
+            <span class="bar"></span>
+            <span class="bar"></span>
+            <span class="bar"></span>
+        </div>
+    </nav>
+
+    <header class="hero" style="background-image: url('https://images.unsplash.com/photo-1556656793-02715d8dd6f8?q=80&w=2070&auto=format&fit=crop');">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <img src="logobrenno.jpg" 
+                 alt="Logo Brenno Cell" class="profile-pic">
+            
+            <h1 class="title-masculine">O REI DOS <br> <span style="color:var(--accent)">iPHONES</span></h1>
+            <p class="subtitle">Qualidade Premium. Procedência. Garantia.</p>
+            
+            <div class="cta-box">
+                <a href="catalogo.html" class="btn-neon">
+                    <i class="fas fa-store"></i> VER LOJA COMPLETA
+                </a>
+                <a href="#contatos" class="btn-outline">Vender meu usado</a>
+            </div>
+        </div>
     </header>
 
-    <main>
-        <div id="vitrine" class="grid-container">
-            <p style="text-align:center; width:100%;">Carregando novidades...</p>
+    <section class="catalog-section">
+        <h2 class="section-title">Destaques da Semana 🔥</h2>
+        <div id="vitrine-destaque" class="catalog-grid">
+            <p style="text-align: center; color: #666; grid-column: 1/-1;">
+                <i class="fas fa-spinner fa-spin"></i> Carregando ofertas...
+            </p>
         </div>
-    </main>
+        <div style="text-align: center; margin-top: 40px;">
+            <a href="catalogo.html" class="btn-outline">VER TODOS OS MODELOS</a>
+        </div>
+    </section>
+
+    <section class="custom-section">
+        <div class="custom-box">
+            <h2>Não achou o modelo?</h2>
+            <p>Trabalhamos com encomendas exclusivas. Peça o seu iPhone dos sonhos agora.</p>
+            <a href="https://wa.me/5584999999999" class="btn-white">FAZER ORÇAMENTO</a>
+        </div>
+    </section>
+
+    <section class="visit-section">
+        <h2 class="section-title">Visite Nossa Loja</h2>
+        
+        <div class="visit-container">
+            <div class="visit-gallery">
+                <div class="gallery-item main-photo">
+                    <img src="https://images.unsplash.com/photo-1556742049-0cfed4f7a07d?q=80&w=2070&auto=format&fit=crop" alt="Fachada da Loja">
+                    <div class="overlay"><h3>Fachada Moderna</h3></div>
+                </div>
+                <div class="gallery-item sub-photo">
+                    <img src="https://images.unsplash.com/photo-1531297461136-82lwDe4129e?q=80&w=2070&auto=format&fit=crop" alt="Interior Confortável">
+                    <div class="overlay"><h3>Interior Climatizado</h3></div>
+                </div>
+            </div>
+
+            <div class="visit-info-card">
+                <div class="info-header">
+                    <h3><i class="fas fa-map-marker-alt"></i> Onde Estamos</h3>
+                    <p>Venha tomar um café com a gente!</p>
+                </div>
+                
+                <div class="map-frame">
+                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3972.169724734346!2d-37.6896263!3d-5.5995484!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x7b077a064119d69%3A0xe546949390234a9!2sFelipe%20Guerra%2C%20RN!5e0!3m2!1spt-BR!2sbr!4v1700000000000!5m2!1spt-BR!2sbr" allowfullscreen="" loading="lazy"></iframe>
+                </div>
+
+                <div class="info-details">
+                    <p><strong>Endereço:</strong> Rua Exemplo, 123 - Centro</p>
+                    <p><strong>Horário:</strong> Seg à Sex: 08h - 18h | Sáb: 08h - 12h</p>
+                    <a href="https://maps.google.com" target="_blank" class="btn-rota">
+                        TRAÇAR ROTA <i class="fas fa-location-arrow"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="team-section">
+        <h2 class="section-title">Quem Faz Acontecer</h2>
+        <div class="team-grid">
+            
+            <div class="team-member">
+                <div class="member-img">
+                    <img src="perfil-anonimo.webp" alt="Brenno">
+                </div>
+                <h3>Brenno</h3>
+                <p class="role">Fundador & Especialista</p>
+            </div>
+
+            <div class="team-member">
+                <div class="member-img">
+                    <img src="perfil-anonimo.webp" alt="Atendente">
+                </div>
+                <h3>Maria</h3>
+                <p class="role">Vendas</p>
+            </div>
+
+             <div class="team-member">
+                <div class="member-img">
+                    <img src="perfil-anonimo.webp" alt="Técnico">
+                </div>
+                <h3>João</h3>
+                <p class="role">Suporte Técnico</p>
+            </div>
+
+        </div>
+    </section>
+
+    <section id="contatos" class="contacts-section">
+        <h2 class="section-title">Canais de Atendimento</h2>
+        <div class="contacts-grid">
+            <a href="https://instagram.com/brennocell" target="_blank" class="contact-card">
+                <i class="fab fa-instagram"></i>
+                <h3>Instagram</h3>
+                <p>@brennocell</p>
+            </a>
+            <a href="https://wa.me/5584999999999" target="_blank" class="contact-card">
+                <i class="fab fa-whatsapp"></i>
+                <h3>WhatsApp</h3>
+                <p>(84) 99999-9999</p>
+            </a>
+            <a href="mailto:contato@brennocell.com" class="contact-card">
+                <i class="far fa-envelope"></i>
+                <h3>E-mail</h3>
+                <p>contato@brennocell.com</p>
+            </a>
+        </div>
+    </section>
+
 
     <footer>
-        <p>Desenvolvido por Você - SaaS Technology</p>
+        <p>© 2026 Brenno Cell. Todos os direitos reservados.</p>
     </footer>
+
+    <a href="https://wa.me/5584999999999" class="float-wa" target="_blank">
+        <i class="fab fa-whatsapp"></i>
+    </a>
 
     <script type="module" src="js/app.js"></script>
 </body>

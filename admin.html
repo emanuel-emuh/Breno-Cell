@@ -3,33 +3,116 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel Admin - Brenno Cell</title>
+    <title>Gerenciador | Brenno Cell</title>
     <link rel="stylesheet" href="css/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
-<body>
-    <header>
-        <h1>Painel de Controle 🔒</h1>
-    </header>
+<body class="theme-brenno">
 
-    <main class="admin-container">
-        <section class="card">
-            <h2>Cadastrar Novo Produto</h2>
-            <form id="formProduto">
-                <input type="text" id="modelo" placeholder="Modelo (ex: iPhone 13 Pro)" required>
-                <input type="text" id="detalhes" placeholder="Detalhes (ex: 128GB - Grafite)" required>
-                <input type="number" id="preco" placeholder="Preço (R$)" required>
-                <input type="url" id="imagem" placeholder="Link da Imagem (URL)">
-                <button type="submit" class="btn-green">Adicionar ao Estoque</button>
-            </form>
-        </section>
+    <nav class="navbar">
+        <div class="logo" style="color: var(--accent);">ESTOQUE</div>
+        <a href="index.html" class="switch-btn">
+            <i class="fas fa-home"></i> VER LOJA
+        </a>
+    </nav>
 
-        <section class="card">
-            <h2>Estoque Atual</h2>
-            <div id="listaProdutos" class="product-list">
-                <p>Carregando estoque...</p>
+    <div class="admin-section">
+        
+        <div class="dashboard-stats">
+            <div class="stat-card">
+                <i class="fas fa-cubes"></i>
+                <div>
+                    <h3>Produtos Totais</h3>
+                    <p id="totalProdutos">0</p>
+                </div>
             </div>
-        </section>
-    </main>
+            <div class="stat-card">
+                <i class="fas fa-exclamation-triangle"></i>
+                <div>
+                    <h3>Baixo Estoque</h3>
+                    <p id="baixoEstoque">0</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-box">
+            <h2><i class="fas fa-plus-circle"></i> Novo Item</h2>
+            <form id="formProduto">
+                <div class="form-row">
+                    <div class="form-group" style="flex: 2;">
+                        <label>Nome do Produto</label>
+                        <input type="text" id="modelo" placeholder="Ex: iPhone 15 Pro" required>
+                    </div>
+                    
+                    <div class="form-group" style="flex: 1;">
+                        <label>Categoria</label>
+                        <select id="categoria" required>
+                            <option value="iPhone">iPhone</option>
+                            <option value="Android">Android</option>
+                            <option value="Acessório">Acessório</option>
+                            <option value="Outros">Outros</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Quantidade Inicial</label>
+                        <input type="number" id="quantidade" value="1" min="1" required style="border-color: var(--accent);">
+                    </div>
+                    
+                    <div class="form-group" style="flex: 2;">
+                        <label>Preço de Venda (R$)</label>
+                        <input type="number" id="preco" placeholder="0.00" step="0.01" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Detalhes</label>
+                    <input type="text" id="detalhes" placeholder="Ex: 256GB - Azul Titânio" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Link da Foto (URL)</label>
+                    <input type="url" id="imagem" placeholder="https://..." required>
+                </div>
+
+                <button type="submit" class="btn-neon" style="width: 100%; border: none; cursor: pointer;">
+                    CADASTRAR
+                </button>
+            </form>
+        </div>
+
+        <div class="filters-container">
+            <input type="text" id="searchBar" placeholder="🔍 Buscar produto...">
+            <select id="filterCategory">
+                <option value="todos">Tudo</option>
+                <option value="iPhone">iPhone</option>
+                <option value="Android">Android</option>
+                <option value="Acessório">Acessório</option>
+            </select>
+        </div>
+
+        <div id="listaAdmin" class="admin-grid">
+            <p style="color: #666; text-align: center; grid-column: 1/-1;">Carregando...</p>
+        </div>
+
+    </div>
+
+    <div id="modalPromo" class="modal-overlay">
+        <div class="modal-content">
+            <h3>⚡ Criar Oferta Relâmpago</h3>
+            <p id="nomeProdutoModal" style="color: #aaa; margin-bottom: 20px;">Produto...</p>
+            
+            <label>Preço Promocional (R$)</label>
+            <input type="number" id="novoPrecoPromo" placeholder="Ex: 3500.00">
+            
+            <div class="modal-actions">
+                <button onclick="fecharModal()" class="btn-outline">Cancelar</button>
+                <button onclick="confirmarPromo()" class="btn-neon">Aplicar Oferta</button>
+            </div>
+        </div>
+    </div>
 
     <script type="module" src="js/admin.js"></script>
 </body>
