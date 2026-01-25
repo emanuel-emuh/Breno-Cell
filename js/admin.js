@@ -3,7 +3,6 @@ import { collection, addDoc, getDocs, deleteDoc, updateDoc, doc } from "https://
 
 // --- 1. SEGURANÇA (Opcional) ---
 const senhaReal = "brenno123";
-// Descomente as 2 linhas abaixo para ativar a proteção de senha
 // const senhaDigitada = prompt("🔒 Digite a senha de administrador:");
 // if (senhaDigitada !== senhaReal) window.location.href = "index.html"; 
 
@@ -26,7 +25,67 @@ const inputPrecoPromo = document.getElementById('novoPrecoPromo');
 let produtoSelecionadoId = null; 
 let todosProdutos = [];
 
-// --- 3. CARREGAR ESTOQUE (Função Principal) ---
+// --- FUNÇÕES DE FORMATAÇÃO DE PREÇO (ESSENCIAIS) ---
+
+// 1. Formata o Input ENQUANTO você digita (Visual: R$ 3.400,00)
+// Precisa estar no window para o HTML "enxergar" o oninput
+window.formatarMoedaInput = (elemento) => {
+    let valor = elemento.value.replace(/\D/g, ""); // Remove tudo que não é número
+    
+    // Converte para moeda (divide por 100 para ter centavos)
+    valor = (valor / 100).toLocaleString("pt-BR", {
+        style: "currency",
+        currency: "BRL"
+    });
+
+    elemento.value = valor;
+}
+
+// 2. Limpa a formatação para salvar no Banco (Banco aceita: 3400.00)
+const converterPrecoParaBanco = (valorString) => {
+    if (!valorString) return 0;
+    // Remove "R$", espaços e pontos de milhar. Troca vírgula por ponto.
+    // Ex: "R$ 1.200,50" -> "1200.50"
+    let limpo = valorString.replace(/^R\$\s?/, "").replace(/\./g, "").replace(",", ".").trim();
+    return parseFloat(limpo);
+}
+
+// 3. Formata número do banco para exibir na lista (Visual: R$ 3.400,00)
+const formatarMoeda = (valor) => {
+    return parseFloat(valor).toLocaleString('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+    });
+}
+
+// --- FUNÇÃO: COMPRIMIR IMAGEM (BASE64) ---
+const comprimirImagem = (arquivo) => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(arquivo);
+        reader.onload = (event) => {
+            const img = new Image();
+            img.src = event.target.result;
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                // Redimensionar para max 800px (para não pesar o banco)
+                const maxWidth = 800;
+                const scaleSize = maxWidth / img.width;
+                canvas.width = maxWidth;
+                canvas.height = img.height * scaleSize;
+
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                // Converte para JPG qualidade 70%
+                const base64 = canvas.toDataURL('image/jpeg', 0.7);
+                resolve(base64);
+            };
+        };
+        reader.onerror = (error) => reject(error);
+    });
+};
+
+// --- 3. CARREGAR ESTOQUE ---
 async function carregarEstoque() {
     lista.innerHTML = '<p style="color:#aaa; text-align:center; padding:20px;">Atualizando estoque...</p>';
     
@@ -37,7 +96,6 @@ async function carregarEstoque() {
 
         querySnapshot.forEach((doc) => {
             const dados = doc.data();
-            // Garante que a quantidade seja número (se vier vazio, assume 1)
             const qtd = dados.quantidade ? parseInt(dados.quantidade) : 0;
             const preco = parseFloat(dados.preco);
             const precoAntigo = dados.precoAntigo ? parseFloat(dados.precoAntigo) : 0;
@@ -50,22 +108,20 @@ async function carregarEstoque() {
                 precoAntigo: precoAntigo
             });
             
-            // Conta produtos com estoque baixo (menos de 2)
             if (qtd < 2) contaBaixoEstoque++;
         });
 
-        // Atualiza os números lá no topo (Dashboard)
         if(totalEl) totalEl.innerText = todosProdutos.length;
         if(baixoEl) baixoEl.innerText = contaBaixoEstoque;
         
-        filtrar(); // Renderiza a lista na tela com os filtros atuais
+        filtrar(); 
     } catch (error) {
         console.error("Erro:", error);
-        lista.innerHTML = '<p style="color:red; text-align:center;">Erro ao conectar com o banco de dados.</p>';
+        lista.innerHTML = '<p style="color:red; text-align:center;">Erro ao conectar com o banco.</p>';
     }
 }
 
-// --- 4. RENDERIZAR A LISTA (Visão do Admin) ---
+// --- 4. RENDERIZAR A LISTA ---
 function renderizarLista(produtos) {
     lista.innerHTML = '';
 
@@ -75,21 +131,23 @@ function renderizarLista(produtos) {
     }
 
     produtos.forEach((prod) => {
-        // Lógica visual: Se tem promoção, mostra riscado
-        let htmlPreco = `R$ ${prod.preco}`;
+        // Usa a função de formatação para exibir bonito
+        let precoFormatado = formatarMoeda(prod.preco);
+        let htmlPreco = precoFormatado;
+        
         let textoBotaoPromo = "⚡ CRIAR OFERTA";
-        let classeBotaoPromo = ""; // Estilo padrão (transparente/dourado)
+        let classeBotaoPromo = ""; 
 
-        if (prod.precoAntigo && prod.precoAntigo > prod.preco) {
+        if (prod.precoAntigo && parseFloat(prod.precoAntigo) > parseFloat(prod.preco)) {
+            let antigoFormatado = formatarMoeda(prod.precoAntigo);
             htmlPreco = `
-                <span style="text-decoration:line-through; color:#777; font-size:0.9rem;">R$ ${prod.precoAntigo}</span> 
-                <span style="color:#00e676; font-weight:bold;">R$ ${prod.preco}</span>
+                <span style="text-decoration:line-through; color:#777; font-size:0.9rem;">${antigoFormatado}</span> 
+                <span style="color:#00e676; font-weight:bold;">${precoFormatado}</span>
             `;
             textoBotaoPromo = "❌ REMOVER OFERTA";
-            classeBotaoPromo = "ativo"; // Fica preenchido de amarelo
+            classeBotaoPromo = "ativo"; 
         }
 
-        // HTML do Card de Admin
         lista.innerHTML += `
             <div class="card">
                 <span class="cat-tag">${prod.categoria || 'Geral'}</span>
@@ -121,39 +179,80 @@ function renderizarLista(produtos) {
     });
 }
 
-// --- 5. ALTERAR QUANTIDADE (+ e -) ---
+// --- 5. CADASTRO (COM UPLOAD DE FOTO E PREÇO CORRIGIDO) ---
+form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const btn = form.querySelector('button');
+    btn.innerHTML = 'Processando...'; btn.disabled = true;
+
+    try {
+        const arquivoInput = document.getElementById('imagemInput');
+        
+        if (!arquivoInput.files || arquivoInput.files.length === 0) {
+            throw new Error("Selecione uma imagem!");
+        }
+
+        // 1. Converte a imagem
+        const imagemBase64 = await comprimirImagem(arquivoInput.files[0]);
+
+        // 2. Converte o preço formatado (R$ 1.200,00) para número (1200.00)
+        const precoInput = document.getElementById('preco').value;
+        const precoFloat = converterPrecoParaBanco(precoInput);
+
+        if (isNaN(precoFloat) || precoFloat === 0) {
+            throw new Error("Preço inválido! Digite apenas números.");
+        }
+
+        await addDoc(collection(db, "iphones"), {
+            modelo: document.getElementById('modelo').value,
+            categoria: document.getElementById('categoria').value,
+            quantidade: parseInt(document.getElementById('quantidade').value) || 1,
+            preco: precoFloat, // Salva o número limpo
+            detalhes: document.getElementById('detalhes').value,
+            imagem: imagemBase64, 
+            precoAntigo: 0, 
+            data_cadastro: new Date()
+        });
+        
+        alert("✅ Produto cadastrado com sucesso!");
+        form.reset();
+        document.getElementById('quantidade').value = "1"; 
+        carregarEstoque();
+    } catch (error) {
+        alert("Erro: " + error.message);
+        console.error(error);
+    } finally {
+        btn.innerHTML = 'CADASTRAR'; btn.disabled = false;
+    }
+});
+
+// --- 6. FUNÇÕES EXTRAS ---
+
 window.alterarQtd = async (id, delta, qtdAtual) => {
     let novaQtd = parseInt(qtdAtual) + delta;
-    if (novaQtd < 0) novaQtd = 0; // Impede estoque negativo
+    if (novaQtd < 0) novaQtd = 0; 
 
     try {
         const prodRef = doc(db, "iphones", id);
         await updateDoc(prodRef, { quantidade: novaQtd });
-        
-        // Atualiza a lista localmente para ser rápido, depois recarrega
         const index = todosProdutos.findIndex(p => p.id === id);
         if (index !== -1) todosProdutos[index].quantidade = novaQtd;
-        
-        filtrar(); // Atualiza visualmente sem ir no banco de novo (mais rápido)
-        carregarEstoque(); // Garante sincronia com o banco
+        filtrar(); 
+        carregarEstoque(); 
     } catch (error) {
-        alert("Erro ao atualizar estoque: " + error.message);
+        alert("Erro ao atualizar estoque.");
     }
 }
 
-// --- 6. SISTEMA DE PROMOÇÃO (MODAL) ---
 window.gerenciarPromo = (id, nome, precoAtual, precoAntigoExistente) => {
-    // Se já tem oferta ativa, perguntamos se quer remover
     if (precoAntigoExistente && parseFloat(precoAntigoExistente) > parseFloat(precoAtual)) {
-        if(confirm(`O produto está em oferta. Deseja voltar o preço para R$ ${precoAntigoExistente}?`)) {
-            removerPromo(id, precoAntigoExistente);
-        }
+        if(confirm(`Remover oferta?`)) removerPromo(id, precoAntigoExistente);
     } else {
-        // Se não tem oferta, abre o modal para criar
         produtoSelecionadoId = id;
-        nomeProdModal.innerText = nome; // Mostra nome no modal
-        inputPrecoPromo.value = "";     // Limpa campo
-        if(modal) modal.style.display = 'flex'; // Exibe modal
+        nomeProdModal.innerText = nome; 
+        inputPrecoPromo.value = "";     
+        if(modal) modal.style.display = 'flex'; 
         inputPrecoPromo.focus();
     }
 }
@@ -168,17 +267,14 @@ window.confirmarPromo = async () => {
     
     if (!novoValor || novoValor <= 0) return alert("Digite um valor de oferta válido!");
     
-    // Busca o produto na lista local para pegar o preço original (que vai virar antigo)
     const prod = todosProdutos.find(p => p.id === produtoSelecionadoId);
     
     if (novoValor >= parseFloat(prod.preco)) return alert("O preço da oferta deve ser MENOR que o preço atual!");
 
     try {
-        const prodRef = doc(db, "iphones", produtoSelecionadoId);
-        
-        await updateDoc(prodRef, {
-            preco: novoValor,         // O preço vira o valor da oferta
-            precoAntigo: prod.preco   // O preço antigo guarda o valor original
+        await updateDoc(doc(db, "iphones", produtoSelecionadoId), {
+            preco: novoValor,         
+            precoAntigo: prod.preco   
         });
 
         alert("🔥 Oferta criada com sucesso!");
@@ -191,49 +287,26 @@ window.confirmarPromo = async () => {
 
 async function removerPromo(id, precoOriginal) {
     try {
-        const prodRef = doc(db, "iphones", id);
-        await updateDoc(prodRef, {
-            preco: parseFloat(precoOriginal), // Volta ao preço original
-            precoAntigo: 0                    // Zera o campo de preço antigo
-        });
+        await updateDoc(doc(db, "iphones", id), { preco: parseFloat(precoOriginal), precoAntigo: 0 });
         carregarEstoque();
     } catch (error) {
         alert("Erro ao remover oferta.");
     }
 }
 
-// --- 7. CADASTRAR NOVO PRODUTO ---
-form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const btn = form.querySelector('button');
-    btn.innerHTML = 'Salvando...'; btn.disabled = true;
-
-    try {
-        await addDoc(collection(db, "iphones"), {
-            modelo: document.getElementById('modelo').value,
-            categoria: document.getElementById('categoria').value,
-            // Pega a quantidade do input (ou 1 se estiver vazio)
-            quantidade: parseInt(document.getElementById('quantidade').value) || 1,
-            preco: parseFloat(document.getElementById('preco').value),
-            detalhes: document.getElementById('detalhes').value,
-            imagem: document.getElementById('imagem').value,
-            precoAntigo: 0, // Começa sem promoção
-            data_cadastro: new Date()
-        });
-        
-        alert("✅ Produto cadastrado!");
-        form.reset();
-        document.getElementById('quantidade').value = "1"; // Reseta qtd para 1
-        carregarEstoque();
-    } catch (error) {
-        alert("Erro: " + error.message);
-    } finally {
-        btn.innerHTML = 'CADASTRAR'; btn.disabled = false;
+window.deletarProduto = async (id) => {
+    if(confirm("Tem certeza que deseja excluir este produto do estoque?")) {
+        try {
+            await deleteDoc(doc(db, "iphones", id));
+            todosProdutos = todosProdutos.filter(p => p.id !== id);
+            filtrar();
+            carregarEstoque(); 
+        } catch (error) {
+            alert("Erro ao deletar.");
+        }
     }
-});
+}
 
-// --- 8. FILTROS E BUSCA (Ao digitar) ---
 function filtrar() {
     const termo = searchInput.value.toLowerCase();
     const cat = filterSelect.value;
@@ -248,21 +321,6 @@ function filtrar() {
 
 searchInput.addEventListener('input', filtrar);
 filterSelect.addEventListener('change', filtrar);
-
-// --- 9. DELETAR PRODUTO ---
-window.deletarProduto = async (id) => {
-    if(confirm("Tem certeza que deseja excluir este produto do estoque?")) {
-        try {
-            await deleteDoc(doc(db, "iphones", id));
-            // Remove da lista local para atualizar rápido
-            todosProdutos = todosProdutos.filter(p => p.id !== id);
-            filtrar();
-            carregarEstoque(); // Sincroniza
-        } catch (error) {
-            alert("Erro ao deletar.");
-        }
-    }
-}
 
 // Inicia o sistema
 carregarEstoque();

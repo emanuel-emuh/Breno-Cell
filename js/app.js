@@ -21,6 +21,14 @@ let filtroAtual = {
     ordem: "relevancia"
 };
 
+// --- HELPER: FORMATAR MOEDA (R$ 2.500,00) ---
+const formatarMoeda = (valor) => {
+    return parseFloat(valor).toLocaleString('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+    });
+}
+
 // --- MENU MOBILE ---
 if (hamburger && navMenu) {
     hamburger.addEventListener("click", () => {
@@ -144,22 +152,26 @@ function aplicarFiltros() {
     }
 }
 
-// --- CRIAR CARD (VISUAL) ---
+// --- CRIAR CARD (VISUAL COM FORMATAÇÃO) ---
 function criarCard(prod, divAlvo) {
     const precoAtual = parseFloat(prod.preco);
     const precoAntigo = parseFloat(prod.precoAntigo);
-    let htmlPreco = `R$ ${prod.preco}`;
+    
+    // Formata o preço novo (ex: R$ 2.500,00)
+    let htmlPreco = formatarMoeda(precoAtual);
     let htmlBadge = ''; 
 
     if (precoAntigo && precoAntigo > precoAtual) {
+        // Formata o preço antigo
+        const antigoFormatado = formatarMoeda(precoAntigo);
         htmlPreco = `
-            <span class="old-price">R$ ${prod.precoAntigo}</span>
-            <span style="color:#00e676;">R$ ${prod.preco}</span>
+            <span class="old-price">${antigoFormatado}</span>
+            <span style="color:#00e676;">${htmlPreco}</span>
         `;
         htmlBadge = `<span class="promo-badge">OFERTA 🔥</span>`;
     }
 
-    const zapMsg = `Olá! Vi o *${prod.modelo}* (${prod.detalhes}) por R$ ${prod.preco} no site. Tenho interesse!`;
+    const zapMsg = `Olá! Vi o *${prod.modelo}* (${prod.detalhes}) por ${formatarMoeda(precoAtual)} no site. Tenho interesse!`;
     const linkZap = `https://wa.me/5584999999999?text=${encodeURIComponent(zapMsg)}`;
 
     divAlvo.innerHTML += `
