@@ -21,7 +21,7 @@ let filtroAtual = {
     ordem: "relevancia"
 };
 
-// --- HELPER: FORMATAR MOEDA (R$ 2.500,00) ---
+// --- HELPER: FORMATAR MOEDA (R$ 0.000,00) ---
 const formatarMoeda = (valor) => {
     return parseFloat(valor).toLocaleString('pt-BR', {
         style: 'currency',
@@ -172,7 +172,7 @@ function criarCard(prod, divAlvo) {
     }
 
     const zapMsg = `Olá! Vi o *${prod.modelo}* (${prod.detalhes}) por ${formatarMoeda(precoAtual)} no site. Tenho interesse!`;
-    const linkZap = `https://wa.me/5584999999999?text=${encodeURIComponent(zapMsg)}`;
+    const linkZap = `https://wa.me/5584996248150?text=${encodeURIComponent(zapMsg)}`;
 
     divAlvo.innerHTML += `
         <div class="card">
