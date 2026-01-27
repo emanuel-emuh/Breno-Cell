@@ -96,11 +96,18 @@
                     <input type="text" id="detalhes" placeholder="Ex: 256GB - Azul Titânio" required>
                 </div>
                 
-                <div class="form-group">
-                    <label>Fotos do Produto (Máx: 4)</label>
-                    <input type="file" id="imagemInput" accept="image/*" multiple required 
-                           style="border: 1px solid var(--accent); padding: 10px; width: 100%; background: #000; color: #fff;">
-                    <small style="color: #aaa; font-size: 0.8rem;">A primeira foto será a capa.</small>
+                <div class="form-row">
+                    <div class="form-group" style="flex: 1;">
+                        <label style="color: var(--accent);">★ Foto de Capa (Principal)</label>
+                        <input type="file" id="imgCapa" accept="image/*" required 
+                               style="border: 2px solid var(--accent); padding: 10px; width: 100%; background: #000; color: #fff;">
+                    </div>
+
+                    <div class="form-group" style="flex: 1;">
+                        <label>Galeria (Até 3 fotos extras)</label>
+                        <input type="file" id="imgGaleria" accept="image/*" multiple 
+                               style="border: 1px solid #333; padding: 10px; width: 100%; background: #000; color: #aaa;">
+                    </div>
                 </div>
 
                 <button type="submit" class="btn-neon" style="width: 100%; border: none; cursor: pointer;">

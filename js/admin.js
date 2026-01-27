@@ -174,51 +174,64 @@ function renderizarLista(produtos) {
     });
 }
 
-// CADASTRO COM MÚLTIPLAS FOTOS (ATUALIZADO)
+// --- CADASTRO COM CAPA + GALERIA SEPARADAS ---
 form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const btn = form.querySelector('button');
     btn.innerHTML = 'Enviando Fotos...'; btn.disabled = true;
 
     try {
-        const arquivoInput = document.getElementById('imagemInput');
+        // 1. Pegar os elementos
+        const inputCapa = document.getElementById('imgCapa');
+        const inputGaleria = document.getElementById('imgGaleria');
         
-        // Verifica arquivos
-        if (!arquivoInput.files || arquivoInput.files.length === 0) {
-            throw new Error("Selecione pelo menos uma imagem!");
+        // Validação da Capa (Obrigatória)
+        if (!inputCapa.files || inputCapa.files.length === 0) {
+            throw new Error("A Foto de Capa é obrigatória!");
         }
 
-        if (arquivoInput.files.length > 4) {
-            throw new Error("Selecione no máximo 4 fotos!");
+        // Validação da Galeria (Máx 3)
+        const totalExtras = inputGaleria.files ? inputGaleria.files.length : 0;
+        if (totalExtras > 3) {
+            throw new Error("Selecione no máximo 3 fotos extras para a galeria.");
         }
 
-        // Processa TODAS as imagens (Loop)
-        const galeriaBase64 = [];
-        for (const arquivo of arquivoInput.files) {
-            const b64 = await comprimirImagem(arquivo);
-            galeriaBase64.push(b64);
+        const listaFinalFotos = [];
+
+        // 2. Processar a CAPA (Será o índice 0)
+        const capaBase64 = await comprimirImagem(inputCapa.files[0]);
+        listaFinalFotos.push(capaBase64);
+
+        // 3. Processar a GALERIA (Se houver, adiciona na sequência)
+        if (totalExtras > 0) {
+            for (const arquivo of inputGaleria.files) {
+                const b64 = await comprimirImagem(arquivo);
+                listaFinalFotos.push(b64);
+            }
         }
 
-        // Processa preço
+        // 4. Preço e Banco
         const precoInput = document.getElementById('preco').value;
         const precoFloat = converterPrecoParaBanco(precoInput);
 
         if (isNaN(precoFloat) || precoFloat === 0) throw new Error("Preço inválido!");
 
-        // Salva no Firestore (imagem = capa, galeria = todas)
         await addDoc(collection(db, "iphones"), {
             modelo: document.getElementById('modelo').value,
             categoria: document.getElementById('categoria').value,
             quantidade: parseInt(document.getElementById('quantidade').value) || 1,
             preco: precoFloat,
             detalhes: document.getElementById('detalhes').value,
-            imagem: galeriaBase64[0], // A primeira foto vira a capa
-            galeria: galeriaBase64,   // Salva a lista completa para o carrossel
+            
+            // SALVA AS IMAGENS
+            imagem: listaFinalFotos[0], // Capa principal para os cards
+            galeria: listaFinalFotos,   // Lista completa para o carrossel
+            
             precoAntigo: 0, 
             data_cadastro: new Date()
         });
         
-        alert("✅ Produto cadastrado com fotos!");
+        alert("✅ Produto cadastrado com sucesso!");
         form.reset();
         document.getElementById('quantidade').value = "1"; 
         carregarEstoque();
