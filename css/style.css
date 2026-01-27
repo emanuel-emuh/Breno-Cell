@@ -127,17 +127,52 @@ body {
 /* Grid de Produtos */
 .catalog-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 25px; max-width: 1200px; margin: 0 auto; }
 
+/* --- ESTILO DOS CARDS (CORRIGIDO) --- */
 .card {
-    background: var(--card-bg); border: 1px solid var(--glass); border-radius: 12px; overflow: hidden;
-    transition: var(--transition); display: flex; flex-direction: column; position: relative;
+    background: #1a1a1a; 
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.2s;
+    border: 1px solid #333;
+    cursor: pointer;
+    position: relative;
+    display: flex;
+    flex-direction: column;
     animation: fadeInGrid 0.5s ease forwards;
 }
-.card:hover { border-color: var(--accent); transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0, 230, 118, 0.15); }
-.card img { width: 100%; height: 250px; object-fit: cover; background: #000; }
-.card-info { padding: 20px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
+
+.card:active { transform: scale(0.98); } /* Efeito de clique no celular */
+
+/* A Mágica da Imagem da Capa */
+.card img {
+    width: 100%;
+    height: 250px; /* Altura fixa para alinhar tudo */
+    object-fit: cover; /* Corta as bordas para preencher sem esticar */
+    object-position: center;
+    background-color: #000;
+}
+
+.card-info {
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    justify-content: space-between;
+}
+
 .card h3 { font-size: 1.1rem; margin-bottom: 5px; font-weight: 700; color: #fff; }
 .card small { color: #aaa; font-size: 0.85rem; margin-bottom: 15px; display: block; }
-.preco { color: var(--accent); font-size: 1.4rem; font-weight: 800; margin-bottom: 15px; }
+.preco { color: var(--accent); font-size: 1.4rem; font-weight: 800; margin-bottom: 10px; }
+
+/* Botão "Ver Detalhes" (Estilo Texto) */
+.btn-comprar {
+    display: block; width: 100%; padding: 10px; margin-top: 5px;
+    color: var(--accent); text-align: center; font-weight: bold;
+    text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px;
+    border: 1px solid rgba(0, 230, 118, 0.3); border-radius: 6px;
+}
+.card:hover { border-color: var(--accent); box-shadow: 0 10px 30px rgba(0, 230, 118, 0.1); }
+.card:hover .btn-comprar { background: var(--accent); color: #000; }
 
 /* Oferta (Etiqueta) */
 .promo-badge {
@@ -146,12 +181,7 @@ body {
     box-shadow: 0 2px 10px rgba(255, 68, 68, 0.5); animation: pulseRed 2s infinite;
 }
 .old-price { text-decoration: line-through; color: #777; font-size: 0.85rem; margin-right: 8px; font-weight: normal; }
-.btn-comprar {
-    display: block; width: 100%; padding: 12px; background: transparent; border: 1px solid var(--accent);
-    color: var(--accent); text-align: center; text-decoration: none; font-weight: bold; border-radius: 6px;
-    transition: var(--transition); text-transform: uppercase; font-size: 0.9rem;
-}
-.btn-comprar:hover { background: var(--accent); color: #000; }
+
 
 /* =========================================
    5. VISITE NOSSA LOJA (MAPA + FOTOS)
@@ -305,8 +335,17 @@ footer { padding: 40px; text-align: center; border-top: 1px solid var(--glass); 
 .qtd-btn:hover { background: var(--accent); color: #000; }
 .sem-estoque { color: #ff4444 !important; }
 
-.modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
-.modal-content { background: var(--card-bg); padding: 30px; border-radius: 15px; width: 90%; max-width: 400px; border: 1px solid var(--accent); text-align: center; box-shadow: 0 0 50px rgba(0, 230, 118, 0.2); }
+/* --- MODAL DO ADMIN (Antigo, de criação de oferta) --- */
+/* Mantive o nome genérico, mas ele é usado só no admin agora */
+.modal-overlay { 
+    display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+    background: rgba(0,0,0,0.85); z-index: 2000; justify-content: center; align-items: center; backdrop-filter: blur(5px); 
+}
+.modal-content { 
+    background: var(--card-bg); padding: 30px; border-radius: 15px; 
+    width: 90%; max-width: 400px; border: 1px solid var(--accent); 
+    text-align: center; box-shadow: 0 0 50px rgba(0, 230, 118, 0.2); 
+}
 .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
 .modal-actions button { flex: 1; }
 
@@ -325,7 +364,7 @@ footer { padding: 40px; text-align: center; border-top: 1px solid var(--glass); 
     .hero { background-attachment: scroll; }
     .btn-neon, .btn-outline { width: 100%; margin-bottom: 10px; }
     .catalog-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
-    .card img { height: 180px; }
+    .card img { height: 200px; }
     .controls-container { flex-direction: column; align-items: stretch; gap: 15px; }
     .filter-pills { justify-content: flex-start; padding-bottom: 10px; }
     .sort-box select { width: 100%; }
@@ -347,9 +386,10 @@ footer { padding: 40px; text-align: center; border-top: 1px solid var(--glass); 
     .hamburger.active .bar:nth-child(1) { transform: translateY(9px) rotate(45deg); }
     .hamburger.active .bar:nth-child(3) { transform: translateY(-9px) rotate(-45deg); }
 }
+
 /* --- BOTÃO SECRETO DO ADMIN --- */
 .admin-lock {
-    color: #1f1f1f; /* Cor escura para camuflar no fundo preto */
+    color: #1f1f1f; 
     margin-left: 10px;
     text-decoration: none;
     font-size: 0.8rem;
@@ -357,52 +397,63 @@ footer { padding: 40px; text-align: center; border-top: 1px solid var(--glass); 
 }
 
 .admin-lock:hover {
-    color: var(--accent); /* Acende em verde neon ao passar o mouse */
+    color: var(--accent); 
     cursor: pointer;
 }
-/* --- MODAL DE PRODUTO & CARROSSEL --- */
+
+/* --- MODAL DE PRODUTO & CARROSSEL (Estilo Fixo) --- */
 .product-modal {
-    max-width: 500px;
-    padding: 0;
-    overflow: hidden;
-    position: relative;
+    width: 100%;
+    max-width: 450px; /* Largura ideal para celular e PC */
+    max-height: 90vh; /* Não deixa passar da altura da tela */
     background: #141414;
+    border-radius: 15px;
+    border: 1px solid #333;
+    overflow-y: auto; /* Permite rolar se o celular for pequeno */
+    position: relative;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    display: flex;
+    flex-direction: column;
+    padding: 0; /* Remove padding padrão do .modal-content */
 }
 
+/* Botão Fechar */
 .close-btn {
-    position: absolute; top: 10px; right: 15px; background: none; border: none;
-    color: #fff; font-size: 2rem; cursor: pointer; z-index: 100;
+    position: absolute; top: 10px; right: 10px;
+    background: rgba(0,0,0,0.6); color: #fff;
+    width: 35px; height: 35px; border-radius: 50%;
+    border: none; font-size: 1.5rem; cursor: pointer; z-index: 100;
+    display: flex; align-items: center; justify-content: center;
 }
 
-/* Área das imagens */
+/* Área do Carrossel (Modal) */
 .carousel-container {
     position: relative;
     width: 100%;
-    height: 350px; /* Altura fixa para as fotos */
+    height: 350px; /* Altura fixa para a foto no modal */
     background: #000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    flex-shrink: 0; /* Impede que a imagem encolha */
 }
 
 .carousel-slide {
-    display: none; /* Esconde todas */
     width: 100%;
     height: 100%;
-    object-fit: contain; /* Ajusta sem cortar */
+    object-fit: contain; /* AQUI ESTÁ O SEGREDO: Mostra a foto inteira sem cortar */
+    display: none;
     animation: fadeEffect 0.4s;
 }
 
-/* Botões Esquerda/Direita */
+/* Setinhas de Navegação */
 .nav-btn {
     position: absolute; top: 50%; transform: translateY(-50%);
-    background: rgba(0,0,0,0.5); color: white; border: none;
-    padding: 15px; cursor: pointer; font-size: 1.2rem; border-radius: 50%;
-    transition: 0.3s; z-index: 10;
+    background: rgba(255,255,255,0.1); color: white; border: none;
+    width: 40px; height: 40px; border-radius: 50%;
+    cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center;
+    transition: 0.2s; z-index: 10;
 }
-.nav-btn:hover { background: var(--accent); color: #000; }
 .prev { left: 10px; }
 .next { right: 10px; }
+.nav-btn:hover { background: var(--accent); color: #000; }
 
 /* Bolinhas em baixo */
 .dots-container {
@@ -414,7 +465,16 @@ footer { padding: 40px; text-align: center; border-top: 1px solid var(--glass); 
 }
 .dot.active, .dot:hover { background-color: var(--accent); transform: scale(1.2); }
 
-.product-details-content { padding: 25px; text-align: left; }
+/* Detalhes do Modal */
+.product-details-content {
+    padding: 20px;
+    background: #141414;
+    color: #fff;
+    text-align: left;
+}
+
+.product-details-content h2 { margin-bottom: 5px; color: #fff; }
+.product-details-content p { color: #aaa; font-size: 0.95rem; line-height: 1.4; }
 
 @keyframes fadeEffect {
     from {opacity: .4} to {opacity: 1}

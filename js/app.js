@@ -21,7 +21,7 @@ let filtroAtual = {
     ordem: "relevancia"
 };
 
-// Variáveis do Carrossel (Novo)
+// Variáveis do Carrossel
 let slideIndex = 0;
 let fotosAtuais = [];
 
@@ -188,6 +188,7 @@ function renderizarCarrossel() {
 
     fotosAtuais.forEach((foto, index) => {
         // Cria imagem (só a primeira visível)
+        // Usa classe object-fit: contain no CSS para não cortar
         container.innerHTML += `<img src="${foto}" class="carousel-slide" style="display: ${index === 0 ? 'block' : 'none'}">`;
         
         // Cria bolinha
@@ -221,7 +222,7 @@ function mostrarSlide(n) {
     dots[slideIndex].className += " active";
 }
 
-// --- CRIAR CARD (VISUAL) ---
+// --- CRIAR CARD (CORRIGIDO PARA MOBILE) ---
 function criarCard(prod, divAlvo) {
     const precoAtual = parseFloat(prod.preco);
     const precoAntigo = parseFloat(prod.precoAntigo);
@@ -238,18 +239,25 @@ function criarCard(prod, divAlvo) {
         htmlBadge = `<span class="promo-badge">OFERTA 🔥</span>`;
     }
 
-    // Prepara objeto seguro para passar na função onclick
-    const prodString = encodeURIComponent(JSON.stringify(prod));
+    // --- CORREÇÃO DO BUG DE CLIQUE ---
+    // 1. Converte para string JSON
+    let prodString = JSON.stringify(prod);
+    // 2. Troca aspas simples por código HTML para não quebrar o onclick
+    prodString = prodString.replace(/'/g, "&#39;"); 
+    // 3. Codifica para URL para garantir segurança
+    prodString = encodeURIComponent(prodString);
 
     divAlvo.innerHTML += `
-        <div class="card" onclick="abrirProduto('${prodString}')" style="cursor: pointer;">
+        <div class="card" onclick="abrirProduto('${prodString}')">
             ${htmlBadge}
-            <img src="${prod.imagem}" alt="${prod.modelo}" loading="lazy">
+            <div style="position: relative;">
+                <img src="${prod.imagem}" alt="${prod.modelo}" loading="lazy">
+            </div>
             <div class="card-info">
                 <h3>${prod.modelo}</h3>
                 <small>${prod.detalhes}</small>
                 <div class="preco">${htmlPreco}</div>
-                <button class="btn-comprar">VER DETALHES</button>
+                <div class="btn-comprar" style="text-align: center; cursor: pointer;">VER DETALHES</div>
             </div>
         </div>
     `;
