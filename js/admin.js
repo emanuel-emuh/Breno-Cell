@@ -1,20 +1,18 @@
-import { db } from './firebase-config.js';
+import { db, auth } from './firebase-config.js';
 import { collection, addDoc, getDocs, deleteDoc, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-// --- 1. SEGURANÇA (Opcional) ---
-const senhaReal = "brenno123";
-// const senhaDigitada = prompt("🔒 Digite a senha de administrador:");
-// if (senhaDigitada !== senhaReal) window.location.href = "index.html"; 
+// --- 1. ELEMENTOS DE SEGURANÇA E TELA ---
+const loginSection = document.getElementById('loginSection');
+const painelAdmin = document.getElementById('painelAdmin');
+const formLogin = document.getElementById('formLogin');
+const btnLogout = document.getElementById('btnLogout');
 
-// --- 2. ELEMENTOS DO HTML ---
+// --- 2. ELEMENTOS DO ADMIN (DO CÓDIGO ANTIGO) ---
 const form = document.getElementById('formProduto');
 const lista = document.getElementById('listaAdmin');
-
-// Elementos do Dashboard
 const totalEl = document.getElementById('totalProdutos');
 const baixoEl = document.getElementById('baixoEstoque'); 
-
-// Elementos de Filtro
 const searchInput = document.getElementById('searchBar');
 const filterSelect = document.getElementById('filterCategory');
 
@@ -25,32 +23,75 @@ const inputPrecoPromo = document.getElementById('novoPrecoPromo');
 let produtoSelecionadoId = null; 
 let todosProdutos = [];
 
-// --- FUNÇÕES DE FORMATAÇÃO DE PREÇO (ESSENCIAIS) ---
+// --- 3. LÓGICA DE AUTENTICAÇÃO (O GUARDIÃO) ---
 
-// 1. Formata o Input ENQUANTO você digita (Visual: R$ 3.400,00)
-// Precisa estar no window para o HTML "enxergar" o oninput
-window.formatarMoedaInput = (elemento) => {
-    let valor = elemento.value.replace(/\D/g, ""); // Remove tudo que não é número
+// Monitora em tempo real: Está logado ou não?
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        // --- SE ESTIVER LOGADO ---
+        console.log("Usuário autenticado:", user.email);
+        loginSection.style.display = 'none';   // Esconde login
+        painelAdmin.style.display = 'block';   // Mostra painel
+        carregarEstoque();                     // Só agora carrega os dados!
+    } else {
+        // --- SE NÃO ESTIVER LOGADO ---
+        loginSection.style.display = 'flex';   // Mostra login
+        painelAdmin.style.display = 'none';    // Esconde painel
+        lista.innerHTML = '';                  // Limpa dados da tela por segurança
+    }
+});
+
+// Botão de Entrar (Login)
+formLogin.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('emailLogin').value;
+    const senha = document.getElementById('senhaLogin').value;
+    const btn = formLogin.querySelector('button');
     
-    // Converte para moeda (divide por 100 para ter centavos)
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verificando...'; 
+    btn.disabled = true;
+
+    try {
+        await signInWithEmailAndPassword(auth, email, senha);
+        // Não precisa fazer nada aqui, o onAuthStateChanged vai detectar e abrir o painel
+    } catch (error) {
+        console.error(error);
+        alert("❌ Acesso Negado! Verifique e-mail e senha.");
+        btn.innerHTML = 'ENTRAR NO SISTEMA';
+        btn.disabled = false;
+    }
+});
+
+// Botão de Sair (Logout)
+if (btnLogout) {
+    btnLogout.addEventListener('click', async () => {
+        if(confirm("Tem certeza que deseja sair?")) {
+            await signOut(auth);
+            window.location.reload(); // Recarrega para garantir limpeza
+        }
+    });
+}
+
+// --- 4. FUNÇÕES ÚTEIS (FORMATAÇÃO E IMAGEM) ---
+
+// Formata o input enquanto digita (R$ 1.200,00)
+window.formatarMoedaInput = (elemento) => {
+    let valor = elemento.value.replace(/\D/g, "");
     valor = (valor / 100).toLocaleString("pt-BR", {
         style: "currency",
         currency: "BRL"
     });
-
     elemento.value = valor;
 }
 
-// 2. Limpa a formatação para salvar no Banco (Banco aceita: 3400.00)
+// Limpa formatação para salvar no banco (1200.00)
 const converterPrecoParaBanco = (valorString) => {
     if (!valorString) return 0;
-    // Remove "R$", espaços e pontos de milhar. Troca vírgula por ponto.
-    // Ex: "R$ 1.200,50" -> "1200.50"
     let limpo = valorString.replace(/^R\$\s?/, "").replace(/\./g, "").replace(",", ".").trim();
     return parseFloat(limpo);
 }
 
-// 3. Formata número do banco para exibir na lista (Visual: R$ 3.400,00)
+// Formata visualmente (R$ 1.200,00)
 const formatarMoeda = (valor) => {
     return parseFloat(valor).toLocaleString('pt-BR', {
         style: 'currency',
@@ -58,7 +99,7 @@ const formatarMoeda = (valor) => {
     });
 }
 
-// --- FUNÇÃO: COMPRIMIR IMAGEM (BASE64) ---
+// Comprime imagem para Base64
 const comprimirImagem = (arquivo) => {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -69,14 +110,11 @@ const comprimirImagem = (arquivo) => {
             img.onload = () => {
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d');
-                // Redimensionar para max 800px (para não pesar o banco)
                 const maxWidth = 800;
                 const scaleSize = maxWidth / img.width;
                 canvas.width = maxWidth;
                 canvas.height = img.height * scaleSize;
-
                 ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                // Converte para JPG qualidade 70%
                 const base64 = canvas.toDataURL('image/jpeg', 0.7);
                 resolve(base64);
             };
@@ -85,9 +123,10 @@ const comprimirImagem = (arquivo) => {
     });
 };
 
-// --- 3. CARREGAR ESTOQUE ---
+// --- 5. LÓGICA DO SISTEMA (CRUD) ---
+
 async function carregarEstoque() {
-    lista.innerHTML = '<p style="color:#aaa; text-align:center; padding:20px;">Atualizando estoque...</p>';
+    lista.innerHTML = '<p style="color:#aaa; text-align:center; padding:20px;"><i class="fas fa-spinner fa-spin"></i> Carregando estoque...</p>';
     
     try {
         const querySnapshot = await getDocs(collection(db, "iphones"));
@@ -97,48 +136,39 @@ async function carregarEstoque() {
         querySnapshot.forEach((doc) => {
             const dados = doc.data();
             const qtd = dados.quantidade ? parseInt(dados.quantidade) : 0;
-            const preco = parseFloat(dados.preco);
-            const precoAntigo = dados.precoAntigo ? parseFloat(dados.precoAntigo) : 0;
-
             todosProdutos.push({ 
                 id: doc.id, 
                 ...dados, 
                 quantidade: qtd,
-                preco: preco,
-                precoAntigo: precoAntigo
+                preco: parseFloat(dados.preco),
+                precoAntigo: parseFloat(dados.precoAntigo || 0)
             });
-            
             if (qtd < 2) contaBaixoEstoque++;
         });
 
         if(totalEl) totalEl.innerText = todosProdutos.length;
         if(baixoEl) baixoEl.innerText = contaBaixoEstoque;
-        
         filtrar(); 
     } catch (error) {
         console.error("Erro:", error);
-        lista.innerHTML = '<p style="color:red; text-align:center;">Erro ao conectar com o banco.</p>';
+        lista.innerHTML = '<p style="color:red; text-align:center;">Erro de permissão ou conexão.</p>';
     }
 }
 
-// --- 4. RENDERIZAR A LISTA ---
 function renderizarLista(produtos) {
     lista.innerHTML = '';
-
     if (produtos.length === 0) {
         lista.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #666;">Nenhum produto encontrado.</p>';
         return;
     }
 
     produtos.forEach((prod) => {
-        // Usa a função de formatação para exibir bonito
         let precoFormatado = formatarMoeda(prod.preco);
         let htmlPreco = precoFormatado;
-        
         let textoBotaoPromo = "⚡ CRIAR OFERTA";
         let classeBotaoPromo = ""; 
 
-        if (prod.precoAntigo && parseFloat(prod.precoAntigo) > parseFloat(prod.preco)) {
+        if (prod.precoAntigo && prod.precoAntigo > prod.preco) {
             let antigoFormatado = formatarMoeda(prod.precoAntigo);
             htmlPreco = `
                 <span style="text-decoration:line-through; color:#777; font-size:0.9rem;">${antigoFormatado}</span> 
@@ -152,24 +182,19 @@ function renderizarLista(produtos) {
             <div class="card">
                 <span class="cat-tag">${prod.categoria || 'Geral'}</span>
                 <img src="${prod.imagem}" alt="${prod.modelo}">
-                
                 <div class="card-info" style="padding: 15px;">
                     <h3 style="font-size: 1rem;">${prod.modelo}</h3>
                     <small>${prod.detalhes}</small>
-                    
                     <div class="preco" style="font-size: 1.1rem; margin: 10px 0;">${htmlPreco}</div>
-
                     <div class="estoque-control">
                         <button class="qtd-btn" onclick="alterarQtd('${prod.id}', -1, ${prod.quantidade})">-</button>
                         <span class="qtd-display ${prod.quantidade == 0 ? 'sem-estoque' : ''}">${prod.quantidade}</span>
                         <button class="qtd-btn" onclick="alterarQtd('${prod.id}', 1, ${prod.quantidade})">+</button>
                     </div>
-
                     <button onclick="gerenciarPromo('${prod.id}', '${prod.modelo}', ${prod.preco}, '${prod.precoAntigo}')" 
                             class="btn-promo ${classeBotaoPromo}">
                         ${textoBotaoPromo}
                     </button>
-                    
                     <button onclick="deletarProduto('${prod.id}')" class="btn-delete">
                         <i class="fas fa-trash"></i> EXCLUIR
                     </button>
@@ -179,75 +204,60 @@ function renderizarLista(produtos) {
     });
 }
 
-// --- 5. CADASTRO (COM UPLOAD DE FOTO E PREÇO CORRIGIDO) ---
+// Cadastro com Login Protegido
 form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    
     const btn = form.querySelector('button');
     btn.innerHTML = 'Processando...'; btn.disabled = true;
 
     try {
         const arquivoInput = document.getElementById('imagemInput');
-        
-        if (!arquivoInput.files || arquivoInput.files.length === 0) {
-            throw new Error("Selecione uma imagem!");
-        }
+        if (!arquivoInput.files || arquivoInput.files.length === 0) throw new Error("Selecione uma imagem!");
 
-        // 1. Converte a imagem
         const imagemBase64 = await comprimirImagem(arquivoInput.files[0]);
-
-        // 2. Converte o preço formatado (R$ 1.200,00) para número (1200.00)
         const precoInput = document.getElementById('preco').value;
         const precoFloat = converterPrecoParaBanco(precoInput);
 
-        if (isNaN(precoFloat) || precoFloat === 0) {
-            throw new Error("Preço inválido! Digite apenas números.");
-        }
+        if (isNaN(precoFloat) || precoFloat === 0) throw new Error("Preço inválido!");
 
         await addDoc(collection(db, "iphones"), {
             modelo: document.getElementById('modelo').value,
             categoria: document.getElementById('categoria').value,
             quantidade: parseInt(document.getElementById('quantidade').value) || 1,
-            preco: precoFloat, // Salva o número limpo
+            preco: precoFloat,
             detalhes: document.getElementById('detalhes').value,
             imagem: imagemBase64, 
             precoAntigo: 0, 
             data_cadastro: new Date()
         });
         
-        alert("✅ Produto cadastrado com sucesso!");
+        alert("✅ Produto cadastrado!");
         form.reset();
         document.getElementById('quantidade').value = "1"; 
         carregarEstoque();
     } catch (error) {
         alert("Erro: " + error.message);
-        console.error(error);
     } finally {
         btn.innerHTML = 'CADASTRAR'; btn.disabled = false;
     }
 });
 
-// --- 6. FUNÇÕES EXTRAS ---
-
+// Funções Globais (necessárias para o HTML chamar onclick)
 window.alterarQtd = async (id, delta, qtdAtual) => {
     let novaQtd = parseInt(qtdAtual) + delta;
     if (novaQtd < 0) novaQtd = 0; 
-
     try {
-        const prodRef = doc(db, "iphones", id);
-        await updateDoc(prodRef, { quantidade: novaQtd });
+        await updateDoc(doc(db, "iphones", id), { quantidade: novaQtd });
         const index = todosProdutos.findIndex(p => p.id === id);
         if (index !== -1) todosProdutos[index].quantidade = novaQtd;
         filtrar(); 
-        carregarEstoque(); 
-    } catch (error) {
-        alert("Erro ao atualizar estoque.");
-    }
+        carregarEstoque();
+    } catch (e) { console.error(e); }
 }
 
-window.gerenciarPromo = (id, nome, precoAtual, precoAntigoExistente) => {
-    if (precoAntigoExistente && parseFloat(precoAntigoExistente) > parseFloat(precoAtual)) {
-        if(confirm(`Remover oferta?`)) removerPromo(id, precoAntigoExistente);
+window.gerenciarPromo = (id, nome, precoAtual, precoAntigo) => {
+    if (precoAntigo && parseFloat(precoAntigo) > parseFloat(precoAtual)) {
+        if(confirm(`Remover oferta?`)) removerPromo(id, precoAntigo);
     } else {
         produtoSelecionadoId = id;
         nomeProdModal.innerText = nome; 
@@ -257,70 +267,48 @@ window.gerenciarPromo = (id, nome, precoAtual, precoAntigoExistente) => {
     }
 }
 
-window.fecharModal = () => {
-    if(modal) modal.style.display = 'none';
-    produtoSelecionadoId = null;
-}
+window.fecharModal = () => { if(modal) modal.style.display = 'none'; produtoSelecionadoId = null; }
 
 window.confirmarPromo = async () => {
     const novoValor = parseFloat(inputPrecoPromo.value);
-    
-    if (!novoValor || novoValor <= 0) return alert("Digite um valor de oferta válido!");
-    
     const prod = todosProdutos.find(p => p.id === produtoSelecionadoId);
-    
-    if (novoValor >= parseFloat(prod.preco)) return alert("O preço da oferta deve ser MENOR que o preço atual!");
+    if (!novoValor || novoValor <= 0) return alert("Valor inválido!");
+    if (novoValor >= prod.preco) return alert("A oferta deve ser menor que o preço atual!");
 
     try {
         await updateDoc(doc(db, "iphones", produtoSelecionadoId), {
-            preco: novoValor,         
-            precoAntigo: prod.preco   
+            preco: novoValor, precoAntigo: prod.preco   
         });
-
-        alert("🔥 Oferta criada com sucesso!");
+        alert("🔥 Oferta ativada!");
         fecharModal();
         carregarEstoque();
-    } catch (error) {
-        alert("Erro ao criar oferta: " + error.message);
-    }
+    } catch (e) { alert("Erro: " + e.message); }
 }
 
 async function removerPromo(id, precoOriginal) {
     try {
         await updateDoc(doc(db, "iphones", id), { preco: parseFloat(precoOriginal), precoAntigo: 0 });
         carregarEstoque();
-    } catch (error) {
-        alert("Erro ao remover oferta.");
-    }
+    } catch (e) { alert("Erro ao remover."); }
 }
 
 window.deletarProduto = async (id) => {
-    if(confirm("Tem certeza que deseja excluir este produto do estoque?")) {
+    if(confirm("Excluir este produto?")) {
         try {
             await deleteDoc(doc(db, "iphones", id));
-            todosProdutos = todosProdutos.filter(p => p.id !== id);
-            filtrar();
             carregarEstoque(); 
-        } catch (error) {
-            alert("Erro ao deletar.");
-        }
+        } catch (e) { alert("Erro ao deletar."); }
     }
 }
 
 function filtrar() {
     const termo = searchInput.value.toLowerCase();
     const cat = filterSelect.value;
-
     const filtrados = todosProdutos.filter(prod => {
-        const matchNome = prod.modelo.toLowerCase().includes(termo);
-        const matchCat = cat === 'todos' || prod.categoria === cat;
-        return matchNome && matchCat;
+        return prod.modelo.toLowerCase().includes(termo) && (cat === 'todos' || prod.categoria === cat);
     });
     renderizarLista(filtrados);
 }
 
 searchInput.addEventListener('input', filtrar);
 filterSelect.addEventListener('change', filtrar);
-
-// Inicia o sistema
-carregarEstoque();

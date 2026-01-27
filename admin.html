@@ -16,8 +16,31 @@
         </a>
     </nav>
 
-    <div class="admin-section">
+    <div id="loginSection" style="display: flex; height: 80vh; justify-content: center; align-items: center; padding: 20px;">
+        <div class="admin-box" style="width: 100%; max-width: 400px; text-align: center;">
+            <h2 style="margin-bottom: 20px;"><i class="fas fa-lock"></i> Área Restrita</h2>
+            <form id="formLogin">
+                <div class="form-group">
+                    <input type="email" id="emailLogin" placeholder="E-mail de Admin" required style="text-align: center;">
+                </div>
+                <div class="form-group">
+                    <input type="password" id="senhaLogin" placeholder="Senha" required style="text-align: center;">
+                </div>
+                <button type="submit" class="btn-neon" style="width: 100%; border: none; cursor: pointer;">
+                    ENTRAR NO SISTEMA
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div id="painelAdmin" class="admin-section" style="display: none;">
         
+        <div style="text-align: right; margin-bottom: 20px;">
+            <button id="btnLogout" class="btn-delete" style="width: auto; display: inline-block; background: #333; color: white; border: 1px solid #555;">
+                <i class="fas fa-sign-out-alt"></i> SAIR
+            </button>
+        </div>
+
         <div class="dashboard-stats">
             <div class="stat-card">
                 <i class="fas fa-cubes"></i>
@@ -62,7 +85,7 @@
                     </div>
                     
                     <div class="form-group" style="flex: 2;">
-                        <label>Preço de Venda</label>
+                        <label>Preço de Venda (R$)</label>
                         <input type="text" id="preco" placeholder="R$ 0,00" required 
                                oninput="formatarMoedaInput(this)">
                     </div>

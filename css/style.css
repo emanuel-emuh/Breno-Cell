@@ -347,3 +347,16 @@ footer { padding: 40px; text-align: center; border-top: 1px solid var(--glass); 
     .hamburger.active .bar:nth-child(1) { transform: translateY(9px) rotate(45deg); }
     .hamburger.active .bar:nth-child(3) { transform: translateY(-9px) rotate(-45deg); }
 }
+/* --- BOTÃO SECRETO DO ADMIN --- */
+.admin-lock {
+    color: #1f1f1f; /* Cor escura para camuflar no fundo preto */
+    margin-left: 10px;
+    text-decoration: none;
+    font-size: 0.8rem;
+    transition: 0.3s;
+}
+
+.admin-lock:hover {
+    color: var(--accent); /* Acende em verde neon ao passar o mouse */
+    cursor: pointer;
+}
