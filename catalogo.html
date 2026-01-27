@@ -75,9 +75,36 @@
         <p>© 2026 Brenno Cell. Todos os direitos reservados.</p>
     </footer>
 
-    <a href="https://wa.me/5584999999999" class="float-wa" target="_blank">
+    <a href="https://wa.me/5584996248150" class="float-wa" target="_blank">
         <i class="fab fa-whatsapp"></i>
     </a>
+
+    <div id="modalProduto" class="modal-overlay" style="display: none; z-index: 9999;">
+        <div class="modal-content product-modal">
+            <button onclick="fecharModalProduto()" class="close-btn">×</button>
+            
+            <div class="carousel-container">
+                <button class="nav-btn prev" onclick="mudarSlide(-1)">❮</button>
+                
+                <div id="carouselSlides">
+                    </div>
+                
+                <button class="nav-btn next" onclick="mudarSlide(1)">❯</button>
+                
+                <div class="dots-container" id="carouselDots">
+                    </div>
+            </div>
+
+            <div class="product-details-content">
+                <h2 id="modalModelo">Modelo</h2>
+                <p id="modalDetalhes" style="color: #aaa; margin-bottom: 10px;">Detalhes...</p>
+                <div id="modalPreco" class="preco" style="font-size: 1.8rem; margin-bottom: 20px;">R$ 0,00</div>
+                <a id="modalLinkZap" href="#" target="_blank" class="btn-neon" style="width: 100%; justify-content: center; display: flex;">
+                    <i class="fab fa-whatsapp"></i> COMPRAR AGORA
+                </a>
+            </div>
+        </div>
+    </div>
 
     <script type="module" src="js/app.js"></script>
 </body>
